@@ -156,8 +156,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
                     else:
                         self.mixedArray=(self.Song1*value)+(self.Song2[0:len(self.Song1)]*(1-value))
                     
-                elif(userChoice=="Second_Song"):
-                    if len(self.Song1) >= len(self.Song2):
+                elif(userChoice=="Second-Song"):
+                    if len(self.Song2) >= len(self.Song1):
                         self.mixedArray=(self.Song2[0:len(self.Song1)]*value)+(self.Song1*(1-value))
                     else:
                         self.mixedArray=(self.Song2*value)+(self.Song1[0:len(self.Song2)]*(1-value))
