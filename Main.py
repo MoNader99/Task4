@@ -28,7 +28,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Song2 = []
         
         self.mixedArray = []
-
+        self.mixedArray_Duration=0
 
         self.Ext_1=None
         self.Ext_2=None
@@ -144,10 +144,12 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     #------------------------------------------------------------------------------------------------------------------------
     def ValueChanged(self):
+        userChoice=self.ui.SelectedSong.currentText()
+        value= (self.ui.MixerSlider.value())/10
+        self.mixedArray=[]
+
         if (self.Ext_1==self.Ext_2) and (self.Ext_2==".mp3"):
             if len(self.Song2)!=0 and len(self.Song1)!=0:
-                userChoice=self.ui.SelectedSong.currentText()
-                value= (self.ui.MixerSlider.value())/10
                 if(userChoice=="First_Song"):
                     if len(self.Song1) >= len(self.Song2):
                         self.mixedArray=(self.Song1[0:len(self.Song2)]*value)+(self.Song2*(1-value))
@@ -161,10 +163,34 @@ class ApplicationWindow(QtWidgets.QMainWindow):
                         self.mixedArray=(self.Song2*value)+(self.Song1[0:len(self.Song2)]*(1-value))
                         
                 self.ui.Play_Mix.clicked.connect(lambda : self.Play(self.mixedArray))
-                logging.info('User Created a mix ')
+                logging.info('User Created a mix with mp3 files ')
             else:
                 QMessageBox.warning(self,'Warning',"ADD TWO SONGS", QMessageBox.Ok )
                 logging.info('User tried to Create a mix while there is No 2 Songs imported')
+
+        elif (self.Ext_1==self.Ext_2) and (self.Ext_2==".wav") :
+            if len(self.Input_Y_1)!=0 and len(self.Input_Y_2)!=0:
+                if(userChoice=="First_Song"): 
+                    if len(self.Input_Y_1[0]) >= len(self.Input_Y_2[0]):
+                        self.mixedArray.append((self.Input_Y_1[0][0:len(self.Input_Y_2[0])]*value)+(self.Input_Y_2[0]*(1-value)))
+                        self.mixedArray.append((self.Input_Y_1[1][0:len(self.Input_Y_2[1])]*value)+(self.Input_Y_2[1]*(1-value)))
+                        self.mixedArray_Duration=self.durationF_1
+                    else:
+                        self.mixedArray.append((self.Input_Y_1[0]*value)+(self.Input_Y_2[0][0:len(self.Input_Y_1[0])]*(1-value)))
+                        self.mixedArray.append((self.Input_Y_1[1]*value)+(self.Input_Y_2[1][0:len(self.Input_Y_1[1])]*(1-value)))
+                        self.mixedArray_Duration=self.durationF_2
+                elif(userChoice=="Second_Song"):
+                    if len(self.Input_Y_1[0]) >= len(self.Input_Y_2[0]):
+                        self.mixedArray.append((self.Input_Y_2[0][0:len(self.Input_Y_1[0])]*value)+(self.Input_Y_1[0]*(1-value)))
+                        self.mixedArray.append((self.Input_Y_2[1][0:len(self.Input_Y_1[1])]*value)+(self.Input_Y_1[1]*(1-value)))
+                        self.mixedArray_Duration=self.durationF_1
+                    else:
+                        self.mixedArray.append((self.Input_Y_2[0]*value)+(self.Input_Y_1[0][0:len(self.Input_Y_2[0])]*(1-value)))
+                        self.mixedArray.append((self.Input_Y_2[1]*value)+(self.Input_Y_1[1][0:len(self.Input_Y_2[1])]*(1-value)))
+                        self.mixedArray_Duration=self.durationF_2
+                        
+                self.ui.Play_Mix.clicked.connect(lambda : self.Play_Wav(self.mixedArray[0],self.mixedArray_Duration))
+                logging.info('User Created a mix with wav files ')
         else:
             QMessageBox.warning(self,'Warning',"add songs with the same extension", QMessageBox.Ok )
             logging.info('User tried to Create a mix while the two songs is not the same extension')
