@@ -179,15 +179,15 @@ class ApplicationWindow(QtWidgets.QMainWindow):
                         self.mixedArray.append((self.Input_Y_1[0]*value)+(self.Input_Y_2[0][0:len(self.Input_Y_1[0])]*(1-value)))
                         self.mixedArray.append((self.Input_Y_1[1]*value)+(self.Input_Y_2[1][0:len(self.Input_Y_1[1])]*(1-value)))
                         self.mixedArray_Duration=self.durationF_2
-                elif(userChoice=="Second_Song"):
-                    if len(self.Input_Y_1[0]) >= len(self.Input_Y_2[0]):
+                elif(userChoice=="Second-Song"):
+                    if len(self.Input_Y_2[0]) >= len(self.Input_Y_1[0]):
                         self.mixedArray.append((self.Input_Y_2[0][0:len(self.Input_Y_1[0])]*value)+(self.Input_Y_1[0]*(1-value)))
                         self.mixedArray.append((self.Input_Y_2[1][0:len(self.Input_Y_1[1])]*value)+(self.Input_Y_1[1]*(1-value)))
-                        self.mixedArray_Duration=self.durationF_1
+                        self.mixedArray_Duration=self.durationF_2
                     else:
                         self.mixedArray.append((self.Input_Y_2[0]*value)+(self.Input_Y_1[0][0:len(self.Input_Y_2[0])]*(1-value)))
                         self.mixedArray.append((self.Input_Y_2[1]*value)+(self.Input_Y_1[1][0:len(self.Input_Y_2[1])]*(1-value)))
-                        self.mixedArray_Duration=self.durationF_2
+                        self.mixedArray_Duration=self.durationF_1
                         
                 self.ui.Play_Mix.clicked.connect(lambda : self.Play_Wav(self.mixedArray[0],self.mixedArray_Duration))
                 logging.info('User Created a mix with wav files ')
