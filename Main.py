@@ -29,10 +29,14 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         
         self.mixedArray = []
 
-        self.Input_X_1=0
-        self.Input_Y_1=0
-        self.Input_X_2=0
-        self.Input_Y_2=0
+
+        self.Ext_1=None
+        self.Ext_2=None
+        
+        self.Input_X_1=[]
+        self.Input_Y_1=[]
+        self.Input_X_2=[]
+        self.Input_Y_2=[]
         self.durationF_1=0
         self.durationF_2=0
         
@@ -76,33 +80,36 @@ class ApplicationWindow(QtWidgets.QMainWindow):
                 if ext == ".wav":
                     self.X_Y_Data = self.ReadFromWav(f,num)
                     if num==0:
+                        self.Ext_1=ext
                         self.Input_X_1=self.X_Y_Data[0]
                         self.Input_Y_1=self.X_Y_Data[1]
+                        self.ui.Play_1.clicked.connect(lambda : self.Play_Wav(self.Input_Y_1[0],self.durationF_1))
+                        logging.info('User Imported wav file from Browse 1')
         
                     if num==1:
+                        self.Ext_2=ext
                         self.Input_X_2=self.X_Y_Data[0]
                         self.Input_Y_2=self.X_Y_Data[1]
-
-                    print(self.Input_Y_1, self.Input_Y_2)   
+                        self.ui.Play_2.clicked.connect(lambda : self.Play_Wav(self.Input_Y_2[0],self.durationF_2))
+                        logging.info('User Imported wav file from Browse 2')
 
                 if ext == ".mp3" :
+                    
                     pydub.AudioSegment.converter = r"C:\ffmpeg\ffmpeg\bin\ffmpeg.exe"
                     songFile = pydub.AudioSegment.from_mp3(f)
                     if num==0:
+                        self.Ext_1=ext
                         self.Song1 = np.array(songFile.get_array_of_samples())
                         self.Song1 = self.Song1.reshape((-1, 2))
-                        self.Song1 = self.Song1.flatten()
                         self.ui.Play_1.clicked.connect(lambda : self.Play(self.Song1))
-                        logging.info('User Imported from Browse 1')
+                        logging.info('User Imported mp3 file from Browse 1')
                     if num==1:
+                        self.Ext_2=ext
                         self.Song2 = np.array(songFile.get_array_of_samples())
                         self.Song2 = self.Song2.reshape((-1, 2))
-                        self.Song2=self.Song2.flatten()
                         self.ui.Play_2.clicked.connect(lambda : self.Play(self.Song2))
-                        logging.info('User Imported from Browse 2')
-
-                    
-                    print(self.Song1, self.Song2)    
+                        logging.info('User Imported mp3 file from Browse 2')
+      
 
                         
    #----------------------------------------------------------------------------------------------------------------
@@ -137,31 +144,41 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     #------------------------------------------------------------------------------------------------------------------------
     def ValueChanged(self):
-        if len(self.Song2)!=0 and len(self.Song1)!=0:
-            userChoice=self.ui.SelectedSong.currentText()
-            value= (self.ui.MixerSlider.value())/10
-            if(userChoice=="First_Song"):
-                if len(self.Song1) > len(self.Song2):
-                    self.mixedArray=(self.Song1[0:len(self.Song2)]*value)+(self.Song2*(1-value))
-                else:
-                    self.mixedArray=(self.Song1*value)+(self.Song2[0:len(self.Song1)]*(1-value))
-                
-            elif(userChoice=="Second_Song"):
-                if len(self.Song1) > len(self.Song2):
-                    self.mixedArray=(self.Song2[0:len(self.Song1)]*value)+(self.Song1*(1-value))
-                else:
-                    self.mixedArray=(self.Song2*value)+(self.Song1[0:len(self.Song2)]*(1-value))
+        if (self.Ext_1==self.Ext_2) and (self.Ext_2==".mp3"):
+            if len(self.Song2)!=0 and len(self.Song1)!=0:
+                userChoice=self.ui.SelectedSong.currentText()
+                value= (self.ui.MixerSlider.value())/10
+                if(userChoice=="First_Song"):
+                    if len(self.Song1) >= len(self.Song2):
+                        self.mixedArray=(self.Song1[0:len(self.Song2)]*value)+(self.Song2*(1-value))
+                    else:
+                        self.mixedArray=(self.Song1*value)+(self.Song2[0:len(self.Song1)]*(1-value))
                     
-            self.ui.Play_Mix.clicked.connect(lambda : self.Play(self.mixedArray))
-            logging.info('User Created a mix ')
+                elif(userChoice=="Second_Song"):
+                    if len(self.Song1) >= len(self.Song2):
+                        self.mixedArray=(self.Song2[0:len(self.Song1)]*value)+(self.Song1*(1-value))
+                    else:
+                        self.mixedArray=(self.Song2*value)+(self.Song1[0:len(self.Song2)]*(1-value))
+                        
+                self.ui.Play_Mix.clicked.connect(lambda : self.Play(self.mixedArray))
+                logging.info('User Created a mix ')
+            else:
+                QMessageBox.warning(self,'Warning',"ADD TWO SONGS", QMessageBox.Ok )
+                logging.info('User tried to Create a mix while there is No 2 Songs imported')
         else:
-            QMessageBox.warning(self,'Warning',"ADD TWO SONGS", QMessageBox.Ok )
-            logging.info('User tried to Create a mix while there is No 2 Songs imported')
-        
+            QMessageBox.warning(self,'Warning',"add songs with the same extension", QMessageBox.Ok )
+            logging.info('User tried to Create a mix while the two songs is not the same extension')
+
+            
     #------------------------------------------------------------------------------------------------------------------------      
     def Play(self,array):    
         sd.play(array)
 
+    def Play_Wav(self,array,D):
+        if ((len(self.Input_X_1) != 0 and len(self.Input_Y_1) != 0) or ((len(self.Input_X_2) != 0 and len(self.Input_Y_2) != 0))):
+            sd.play(array,len(array)/D)
+        else:
+            pass
     
     def Stop(self):
         sd.stop()
