@@ -24,12 +24,18 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.Song1=None
-        self.Song2=None
+        self.Song1 = []
+        self.Song2 = []
         
-        self.mixedArray=None
-        
+        self.mixedArray = []
 
+        self.Input_X_1=0
+        self.Input_Y_1=0
+        self.Input_X_2=0
+        self.Input_Y_2=0
+        self.durationF_1=0
+        self.durationF_2=0
+        
         LOG_FILENAME = 'LOGFILE.txt'
         file = open(LOG_FILENAME,"r+")
         file.truncate(0)
@@ -65,22 +71,69 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             for f in filePath: 
                 if f == "*" or f == None:
                     break
-                ext = os.path.splitext(f)[-1].lower()  # Check file extension                
+                ext = os.path.splitext(f)[-1].lower()  # Check file extension  
+
+                if ext == ".wav":
+                    self.X_Y_Data = self.ReadFromWav(f,num)
+                    if num==0:
+                        self.Input_X_1=self.X_Y_Data[0]
+                        self.Input_Y_1=self.X_Y_Data[1]
+        
+                    if num==1:
+                        self.Input_X_2=self.X_Y_Data[0]
+                        self.Input_Y_2=self.X_Y_Data[1]
+
+                    print(self.Input_Y_1, self.Input_Y_2)   
+
                 if ext == ".mp3" :
                     pydub.AudioSegment.converter = r"C:\ffmpeg\ffmpeg\bin\ffmpeg.exe"
                     songFile = pydub.AudioSegment.from_mp3(f)
                     if num==0:
                         self.Song1 = np.array(songFile.get_array_of_samples())
                         self.Song1 = self.Song1.reshape((-1, 2))
+                        self.Song1 = self.Song1.flatten()
                         self.ui.Play_1.clicked.connect(lambda : self.Play(self.Song1))
                         logging.info('User Imported from Browse 1')
                     if num==1:
                         self.Song2 = np.array(songFile.get_array_of_samples())
                         self.Song2 = self.Song2.reshape((-1, 2))
+                        self.Song2=self.Song2.flatten()
                         self.ui.Play_2.clicked.connect(lambda : self.Play(self.Song2))
                         logging.info('User Imported from Browse 2')
 
+                    
+                    print(self.Song1, self.Song2)    
+
                         
+   #----------------------------------------------------------------------------------------------------------------
+
+    def ReadFromWav(self,file,num):  
+
+        p = pyaudio.PyAudio()
+        self.waveFile = wave.open(file,'rb')
+
+        self.format = p.get_format_from_width(self.waveFile.getsampwidth())
+        channel = self.waveFile.getnchannels()
+        self.rate = self.waveFile.getframerate()
+        self.frame = self.waveFile.getnframes()
+        self.stream = p.open(format=self.format,  # DATA needed for streaming
+                            channels=channel,
+                            rate=self.rate,
+                            output=True)
+        if num==0:
+            self.durationF_1 = self.frame / float(self.rate) # For playing the sound
+
+        if num==1:
+            self.durationF_2 = self.frame / float(self.rate) # For playing the sound
+
+        self.data_int = self.waveFile.readframes(self.frame)
+        self.data_plot = np.fromstring(self.data_int, 'Int16')
+        self.data_plot.shape = -1, 2
+
+        self.data_plot = self.data_plot.T
+        self.time = np.arange(0, self.frame) * (1.0 / self.rate)
+
+        return self.time,self.data_plot
 
     #------------------------------------------------------------------------------------------------------------------------
     def ValueChanged(self):
