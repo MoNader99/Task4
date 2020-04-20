@@ -110,7 +110,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
                         self.ui.Play_2.clicked.connect(lambda : self.Play(self.Song2))
                         logging.info('User Imported mp3 file from Browse 2')
       
-
+   #----------------------------------------------------------------------------------------------------------------
                         
    #----------------------------------------------------------------------------------------------------------------
 
@@ -143,6 +143,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         return self.time,self.data_plot
 
     #------------------------------------------------------------------------------------------------------------------------
+
+    #------------------------------------------------------------------------------------------------------------------------
     def ValueChanged(self):
         userChoice=self.ui.SelectedSong.currentText()
         value= (self.ui.MixerSlider.value())/10
@@ -152,15 +154,15 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             if len(self.Song2)!=0 and len(self.Song1)!=0:
                 if(userChoice=="First_Song"):
                     if len(self.Song1) >= len(self.Song2):
-                        self.mixedArray=(self.Song1[0:len(self.Song2)]*value)+(self.Song2*(1-value))
+                        self.mixedArray=((self.Song1[0:len(self.Song2)]*value)+(self.Song2*(1-value)))/10000
                     else:
-                        self.mixedArray=(self.Song1*value)+(self.Song2[0:len(self.Song1)]*(1-value))
+                        self.mixedArray=((self.Song1*value)+(self.Song2[0:len(self.Song1)]*(1-value)))/10000
                     
                 elif(userChoice=="Second-Song"):
                     if len(self.Song2) >= len(self.Song1):
-                        self.mixedArray=(self.Song2[0:len(self.Song1)]*value)+(self.Song1*(1-value))
+                        self.mixedArray=((self.Song2[0:len(self.Song1)]*value)+(self.Song1*(1-value)))/10000
                     else:
-                        self.mixedArray=(self.Song2*value)+(self.Song1[0:len(self.Song2)]*(1-value))
+                        self.mixedArray=((self.Song2*value)+(self.Song1[0:len(self.Song2)]*(1-value)))/10000
                         
                 self.ui.Play_Mix.clicked.connect(lambda : self.Play(self.mixedArray))
                 logging.info('User Created a mix with mp3 files ')
@@ -172,21 +174,21 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             if len(self.Input_Y_1)!=0 and len(self.Input_Y_2)!=0:
                 if(userChoice=="First_Song"): 
                     if len(self.Input_Y_1[0]) >= len(self.Input_Y_2[0]):
-                        self.mixedArray.append((self.Input_Y_1[0][0:len(self.Input_Y_2[0])]*value)+(self.Input_Y_2[0]*(1-value)))
-                        self.mixedArray.append((self.Input_Y_1[1][0:len(self.Input_Y_2[1])]*value)+(self.Input_Y_2[1]*(1-value)))
+                        self.mixedArray.append(((self.Input_Y_1[0][0:len(self.Input_Y_2[0])]*value)+(self.Input_Y_2[0]*(1-value)))/10000)
+                        self.mixedArray.append(((self.Input_Y_1[1][0:len(self.Input_Y_2[1])]*value)+(self.Input_Y_2[1]*(1-value)))/10000)
                         self.mixedArray_Duration=self.durationF_1
                     else:
-                        self.mixedArray.append((self.Input_Y_1[0]*value)+(self.Input_Y_2[0][0:len(self.Input_Y_1[0])]*(1-value)))
-                        self.mixedArray.append((self.Input_Y_1[1]*value)+(self.Input_Y_2[1][0:len(self.Input_Y_1[1])]*(1-value)))
+                        self.mixedArray.append(((self.Input_Y_1[0]*value)+(self.Input_Y_2[0][0:len(self.Input_Y_1[0])]*(1-value)))/10000)
+                        self.mixedArray.append(((self.Input_Y_1[1]*value)+(self.Input_Y_2[1][0:len(self.Input_Y_1[1])]*(1-value)))/10000)
                         self.mixedArray_Duration=self.durationF_2
                 elif(userChoice=="Second-Song"):
                     if len(self.Input_Y_2[0]) >= len(self.Input_Y_1[0]):
-                        self.mixedArray.append((self.Input_Y_2[0][0:len(self.Input_Y_1[0])]*value)+(self.Input_Y_1[0]*(1-value)))
-                        self.mixedArray.append((self.Input_Y_2[1][0:len(self.Input_Y_1[1])]*value)+(self.Input_Y_1[1]*(1-value)))
+                        self.mixedArray.append(((self.Input_Y_2[0][0:len(self.Input_Y_1[0])]*value)+(self.Input_Y_1[0]*(1-value)))/10000)
+                        self.mixedArray.append(((self.Input_Y_2[1][0:len(self.Input_Y_1[1])]*value)+(self.Input_Y_1[1]*(1-value)))/10000)
                         self.mixedArray_Duration=self.durationF_2
                     else:
-                        self.mixedArray.append((self.Input_Y_2[0]*value)+(self.Input_Y_1[0][0:len(self.Input_Y_2[0])]*(1-value)))
-                        self.mixedArray.append((self.Input_Y_2[1]*value)+(self.Input_Y_1[1][0:len(self.Input_Y_2[1])]*(1-value)))
+                        self.mixedArray.append(((self.Input_Y_2[0]*value)+(self.Input_Y_1[0][0:len(self.Input_Y_2[0])]*(1-value)))/10000)
+                        self.mixedArray.append(((self.Input_Y_2[1]*value)+(self.Input_Y_1[1][0:len(self.Input_Y_2[1])]*(1-value)))/10000)
                         self.mixedArray_Duration=self.durationF_1
                         
                 self.ui.Play_Mix.clicked.connect(lambda : self.Play_Wav(self.mixedArray[0],self.mixedArray_Duration))
@@ -195,6 +197,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             QMessageBox.warning(self,'Warning',"add songs with the same extension", QMessageBox.Ok )
             logging.info('User tried to Create a mix while the two songs is not the same extension')
 
+    #------------------------------------------------------------------------------------------------------------------------
             
     #------------------------------------------------------------------------------------------------------------------------      
     def Play(self,array):    
@@ -209,7 +212,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     def Stop(self):
         sd.stop()
     #------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------------------------------------------------------------------------
+    
+    #------------------------------------------------------------------------------------------------------------------------
 
 #////////////////////////////// Main /////////////////////////////////////
 
