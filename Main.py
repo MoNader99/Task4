@@ -14,7 +14,7 @@ import pydub
 import pyaudio
 import os
 import sounddevice as sd
-
+from songdata import song_data
 
 
 class ApplicationWindow(QtWidgets.QMainWindow):
@@ -30,6 +30,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.mixedArray = []
         self.mixedArray_Duration=0
 
+        self.songsArray = []
+        self.song_index = 0
+
         self.Ext_1=None
         self.Ext_2=None
         
@@ -44,6 +47,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         file = open(LOG_FILENAME,"r+")
         file.truncate(0)
         file.close()
+
+        self.generate_spectrograms()
 
         logging.basicConfig(filename=LOG_FILENAME,format='%(asctime)s - %(message)s ',datefmt='%d-%b-%y %H:%M:%S',level=logging.INFO)
 
@@ -211,6 +216,20 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     
     def Stop(self):
         sd.stop()
+    #------------------------------------------------------------------------------------------------------------------------
+    
+    #------------------------------------------------------------------------------------------------------------------------
+
+    def generate_spectrograms(self):
+        path = '/Songs'
+        filepaths = [os.path.join(r,file) for r,d,f in os.walk(os.getcwd() + path) for file in f]
+        filepaths = [x for x in filepaths if x.endswith(".wav")]
+        for f in filepaths:
+            tempSong = song_data()
+            tempSong.set_Data(f,self.song_index)
+            self.songsArray.append(tempSong)
+            self.song_index = self.song_index + 1
+    
     #------------------------------------------------------------------------------------------------------------------------
     
     #------------------------------------------------------------------------------------------------------------------------
