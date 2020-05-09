@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets , QtCore
+from PyQt5 import QtWidgets , QtCore, QtGui
 from PyQt5.QtGui import QPalette, QColor
 from PyQt5.QtCore import QUrl, QDirIterator, Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QFileDialog, QAction, QHBoxLayout, QVBoxLayout, QSlider,QMessageBox
@@ -30,6 +30,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.mixedArray = []
         self.mixedArray_Duration=0
 
+        self.mixedsong = song_data()
+
         self.songsArray = []
         self.song_index = 0
 
@@ -42,6 +44,10 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Input_Y_2=[]
         self.durationF_1=0
         self.durationF_2=0
+
+        self.similarityIndex = []
+        self.similarityIndexID = []
+        self.topTenSimilarityIndex = []
         
         LOG_FILENAME = 'LOGFILE.txt'
         file = open(LOG_FILENAME,"r+")
@@ -55,8 +61,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     #----------------------------------------------------------------------------------------------------------------
         self.graphic_View_Array=[self.ui.Spectrogram_1,self.ui.Spectrogram_2]
         for x in self.graphic_View_Array:
-            # x.getPlotItem().hideAxis('bottom')
-            # x.getPlotItem().hideAxis('left')
             x.setMouseEnabled(x=False, y=False)
             pass
         #------------------
@@ -66,6 +70,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.browseArray=[self.ui.BrowseButton,self.ui.BrowseButton_2]
         self.ui.BrowseButton.clicked.connect(lambda : self.Import(0))
         self.ui.BrowseButton_2.clicked.connect(lambda : self.Import(1))
+        self.ui.GenerateButton.clicked.connect(self.start_compare)
     #----------------------------------------------------------------------------------------------------------------
         self.ui.MixerSlider.sliderReleased.connect(self.ValueChanged)
     #----------------------------------------------------------------------------------------------------------------
@@ -198,6 +203,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
                         
                 self.ui.Play_Mix.clicked.connect(lambda : self.Play_Wav(self.mixedArray[0],self.mixedArray_Duration))
                 logging.info('User Created a mix with wav files ')
+
+                self.mixedsong.song_data = self.mixedArray
         else:
             QMessageBox.warning(self,'Warning',"add songs with the same extension", QMessageBox.Ok )
             logging.info('User tried to Create a mix while the two songs is not the same extension')
@@ -230,6 +237,65 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             self.songsArray.append(tempSong)
             self.song_index = self.song_index + 1
     
+    #------------------------------------------------------------------------------------------------------------------------
+    
+    #------------------------------------------------------------------------------------------------------------------------
+
+    def start_compare(self):
+        for i in range(len(self.songsArray)):
+            print(len(self.songsArray))
+            percent_hashes = self.mixedArray.compareHashes(self.songsArray[i])
+            percent_peaks = self.mixedArray.comparePeakFeaturesGenerateDifference(self.songsArray[i])
+
+            tempSimilarityIndex = (percent_hashes + percent_peaks )/2
+            self.similarityIndex.append(tempSimilarityIndex * 100)
+            self.similarityIndexID.append(self.songsArray[i].songID)
+
+
+        tempSimilarityIndex = self.similarityIndex
+        print("---------------------------------")
+        print(self.similarityIndexID)
+        print(self.similarityIndex)
+        print("---------------------------------")
+
+        numpyArr=np.array(self.similarityIndex) 
+        self.TopTenSimilarIDs=numpyArr.argsort()[::-1]
+
+        tempSimilarityIndex.sort(reverse = True)
+
+        if len(tempSimilarityIndex) < 10 :
+            for i in tempSimilarityIndex:
+                self.topTenSimilarityIndex.append(i)
+        else:
+            for i in range(10):
+                self.topTenSimilarityIndex.append(tempSimilarityIndex[i])
+        print("Top Similar IDs")
+        print (self.TopTenSimilarIDs)
+        print(self.topTenSimilarityIndex)
+
+        for i in range(len(self.topTenSimilarityIndex)):
+            self.Fill_Similarity_Table(self.TopTenSimilarIDs[i],i)
+
+        self.topTenSimilarityIndex = [ ]
+        self.similarityIndex = [ ]
+        self.similarityIndexID = [ ]
+
+    #------------------------------------------------------------------------------------------------------------------------
+    
+    #------------------------------------------------------------------------------------------------------------------------
+
+    def Fill_Similarity_Table(self,songIndex,normalIndex):
+        rowPosition = self.ui.SongsTable.rowCount()
+        self.ui.SongsTable.insertRow(rowPosition)
+        numrows = self.ui.SongsTable.rowCount()           
+        self.ui.SongsTable.setRowCount(numrows)
+        self.ui.SongsTable.setColumnCount(2)           
+        self.ui.SongsTable.setItem(numrows - 1, 0 ,QtGui.QSongsTableItem(self.songsArray[songIndex].songName))
+        self.ui.SongsTable.setItem(numrows - 1, 1 ,QtGui.QSongsTableItem(str(round(self.topTenSimilarityIndex[normalIndex],2))+"%"))
+
+        self.ui.SongsTable.setHorizontalHeaderItem(0,QtGui.QSongsTableItem("Song Name"))
+        self.ui.SongsTable.setHorizontalHeaderItem(1,QtGui.QSongsTableItem("Similarity Index"))
+
     #------------------------------------------------------------------------------------------------------------------------
     
     #------------------------------------------------------------------------------------------------------------------------

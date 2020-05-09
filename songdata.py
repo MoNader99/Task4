@@ -75,7 +75,7 @@ class song_data():
         self.perceptualHash(self.spectro_path)
         self.peakFeaturesGenerate()
         
-    def GenerateData_NoFilePath(self): #sound data and sample rate are alrdy known before by the UI
+    def GenerateData_NoFilePath(self): 
         
         pylab.figure(num=None, figsize=(19, 12))
         pylab.subplot(111)
@@ -121,9 +121,8 @@ class song_data():
         #----------------
 
         if len(self.peaksFeature) == 0:
-            print("No peaks were detected - No Time difference")
+            print("No peaks detected")
         else:
-            #It calculates the difference from the end of the time array till the start for some fackin reason
             for i in range(len(self.peaksFeature)):
                 try:
                     value = self.peaksFeature[i,0] - self.peaksFeature[j,0]
@@ -133,7 +132,7 @@ class song_data():
                     i = i + 1
 
                 except:
-                    print("Error calculating the last peak time difference cuz odd numbered, no worries, just ignore")
+                    print("created a spectrogram")
 
         self.peaksTimeDifferenceFeature = np.array(test)
         print(self.peaksTimeDifferenceFeature)
